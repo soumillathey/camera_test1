@@ -34,13 +34,6 @@ except ImportError:
     print("[ERROR] 'requests' library is not installed. Run: pip install requests", file=sys.stderr)
     sys.exit(1)
 
-# OpenCV is optional if only HTTP snapshots or local files are used, but required for RTSP
-try:
-    import cv2
-    OPENCV_AVAILABLE = True
-except ImportError:
-    OPENCV_AVAILABLE = False
-
 
 CONFIG_FILE = Path(__file__).parent / "config.json"
 DEFAULT_CONFIG = {
@@ -94,7 +87,9 @@ def fetch_http_snapshot(url: str, timeout: float = 5.0) -> tuple[bytes | None, f
 
 def fetch_rtsp_frame(rtsp_url: str, timeout: float = 5.0) -> tuple[bytes | None, float]:
     """On-demand single frame capture from RTSP stream using OpenCV (matches hermes)."""
-    if not OPENCV_AVAILABLE:
+    try:
+        import cv2
+    except ImportError:
         print("[ERROR] OpenCV (cv2) is required for RTSP URLs. Install with: pip install opencv-python", file=sys.stderr)
         return None, 0.0
 
