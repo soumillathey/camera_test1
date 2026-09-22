@@ -34,32 +34,27 @@ You can edit [`config.json`](./config.json) to set your default URLs:
 
 ## How to Run
 
-### 1. Single-Shot Test (using config.json defaults)
+### 1. Run (Recurring every 5 seconds by default)
+Just run the command — it will automatically grab a frame and query your ANPR server every 5 seconds:
 ```bash
 python3 camera_test.py
 ```
+*(Press `Ctrl + C` anytime to stop)*
 
-### 2. Specify CCTV URL directly via Command Line
-**HTTP Snapshot URL:**
+### 2. Custom Interval (e.g. 3s or 10s)
 ```bash
-python3 camera_test.py --camera-url "http://192.168.1.101/cgi-bin/snapshot.cgi"
+python3 camera_test.py --interval 3.0
 ```
 
-**RTSP Stream URL:**
+### 3. Single-Shot Mode (Run only once)
 ```bash
-python3 camera_test.py --camera-url "rtsp://admin:password@192.168.1.101:554/Streaming/Channels/101"
+python3 camera_test.py --once
 ```
 
-### 3. Specify a Custom ANPR Server Endpoint
+### 4. Override Camera or Server URLs on the Fly
 ```bash
-python3 camera_test.py --server-url "http://127.0.0.1:8000/recognize"
+python3 camera_test.py --camera-url "rtsp://..." --server-url "http://127.0.0.1:8000/recognize"
 ```
-
-### 4. Continuous Mode (Captures every 2 seconds, like Hermes)
-```bash
-python3 camera_test.py --continuous --interval 2.0
-```
-*(Press `Ctrl+C` to stop)*
 
 ### 5. Offline Testing with a Local Image File
 ```bash

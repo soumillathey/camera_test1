@@ -39,6 +39,8 @@ CONFIG_FILE = Path(__file__).parent / "config.json"
 DEFAULT_CONFIG = {
     "camera_url": "http://127.0.0.1:8999/front",
     "anpr_server_url": "http://127.0.0.1:8000/recognize",
+    "interval_seconds": 5.0,
+    "continuous": True,
     "timeout": 30.0,
     "save_last_frame": True,
 }
@@ -315,15 +317,16 @@ def main():
         help="Path to save the captured frame locally for verification.",
     )
     parser.add_argument(
-        "--continuous",
-        action="store_true",
-        help="Continuously capture and send frames periodically (like hermes session loop).",
-    )
-    parser.add_argument(
         "--interval",
         type=float,
-        default=2.0,
-        help="Interval in seconds between frames in continuous mode.",
+        default=float(cfg.get("interval_seconds", 5.0)),
+        help="Interval in seconds between ANPR requests (default: 5.0s).",
+    )
+    parser.add_argument(
+        "--once",
+        "--single-shot",
+        action="store_true",
+        help="Run only once instead of continuous 5-second looping.",
     )
     parser.add_argument(
         "--timeout",
@@ -334,6 +337,8 @@ def main():
 
     args = parser.parse_args()
 
+    is_continuous = not args.once and cfg.get("continuous", True)
+
     print("=" * 65)
     print(" CCTV -> ANPR Test Client (hermes master architecture)")
     print("=" * 65)
@@ -343,10 +348,10 @@ def main():
     else:
         print(f"Input Source       : CCTV Stream ({args.camera_url or 'NOT CONFIGURED'})")
     print(f"ANPR Timeout       : {args.timeout}s")
-    if args.continuous:
-        print(f"Mode               : Continuous (every {args.interval}s, Press Ctrl+C to stop)")
+    if is_continuous:
+        print(f"Mode               : Recurring every {args.interval:.1f}s (Press Ctrl+C to stop)")
     else:
-        print("Mode               : Single Shot")
+        print("Mode               : Single Shot (--once)")
     print("=" * 65)
 
     if not args.image and not args.camera_url:
@@ -357,11 +362,13 @@ def main():
         print("  3. --image <path/to/image.jpg>")
         sys.exit(1)
 
-    if args.continuous:
+    if is_continuous:
         iteration = 1
         try:
             while True:
-                print(f"\n>>> Iteration #{iteration} @ {time.strftime('%H:%M:%S')} <<<")
+                print(f"\n{'━'*65}")
+                print(f" >>> [CYCLE #{iteration}] Capturing & Sending to ANPR @ {time.strftime('%H:%M:%S')} <<<")
+                print(f"{'━'*65}")
                 run_single_test(
                     camera_url=args.camera_url,
                     server_url=args.server_url,
@@ -370,9 +377,11 @@ def main():
                     timeout=args.timeout,
                 )
                 iteration += 1
+                print(f"\n⏳ Sleeping {args.interval:.1f}s before next capture cycle... (Press Ctrl+C to stop)")
                 time.sleep(args.interval)
         except KeyboardInterrupt:
-            print("\n[INFO] Stopped by user (Ctrl+C). Exiting.")
+            print("\n\n[INFO] Stopped by user (Ctrl+C). Exiting.")
+            sys.exit(0)
     else:
         success = run_single_test(
             camera_url=args.camera_url,
