@@ -1,0 +1,6 @@
+{
+  "camera_url": "rtsp://admin:Soumil%40123@192.168.10.251:554/video/live?channel=1&subtype=1",
+  "anpr_server_url": "http://127.0.0.1:8000/recognize",
+  "timeout": 30.0,
+  "save_last_frame": true
+}

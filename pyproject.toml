@@ -1,0 +1,9 @@
+[project]
+name = "camera-test"
+version = "0.1.0"
+description = "CCTV frame grabber and ANPR microservice testing utility"
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.31.0",
+    "opencv-python>=4.8.0",
+]

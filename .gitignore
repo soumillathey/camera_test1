@@ -1,0 +1,15 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+
+# Captured test frames
+captured_frame.jpg
+*.jpg
+*.jpeg
+*.png
+
+# Operating system files
+.DS_Store
+Thumbs.db

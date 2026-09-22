@@ -1,0 +1,67 @@
+# Camera Test & ANPR Service Client
+
+A lightweight, standalone testing utility built directly from the `hermes master` CCTV frame-grabbing and ANPR microservice dispatch architecture.
+
+## What It Does
+1. **CCTV Frame Capture** (matches `hermes/src/devices/camera.py`):
+   - Supports **HTTP JPEG snapshots** (e.g. Dahua/Hikvision `/cgi-bin/snapshot.cgi` or HTTP endpoints).
+   - Supports **RTSP video streams** (e.g. `rtsp://...`) using OpenCV single-frame grabbing with minimal buffer latency.
+   - Supports **local image fallback** (`--image test.jpg`) for testing without an active camera.
+2. **ANPR Microservice Client** (matches `hermes/src/integrations/anpr.py`):
+   - Dispatches the JPEG frame via `multipart/form-data` (`{"file": ("frame.jpg", img_bytes, "image/jpeg")}`).
+   - Automatically maps `0.0.0.0` to `127.0.0.1` and appends `/recognize` if missing.
+3. **Exact Response Display**:
+   - Prints HTTP status code and exact round-trip latency in milliseconds.
+   - Pretty-prints the **entire raw response JSON/body** returned by the ANPR service.
+   - Summarizes model inference time, detected plates, vehicle types, confidence scores, and pre-screening filters.
+
+---
+
+## Configuration (`config.json`)
+
+You can edit [`config.json`](./config.json) to set your default URLs:
+
+```json
+{
+  "camera_url": "http://192.168.1.101/cgi-bin/snapshot.cgi",
+  "anpr_server_url": "http://127.0.0.1:8000/recognize",
+  "timeout": 30.0,
+  "save_last_frame": true
+}
+```
+
+---
+
+## How to Run
+
+### 1. Single-Shot Test (using config.json defaults)
+```bash
+python3 camera_test.py
+```
+
+### 2. Specify CCTV URL directly via Command Line
+**HTTP Snapshot URL:**
+```bash
+python3 camera_test.py --camera-url "http://192.168.1.101/cgi-bin/snapshot.cgi"
+```
+
+**RTSP Stream URL:**
+```bash
+python3 camera_test.py --camera-url "rtsp://admin:password@192.168.1.101:554/Streaming/Channels/101"
+```
+
+### 3. Specify a Custom ANPR Server Endpoint
+```bash
+python3 camera_test.py --server-url "http://127.0.0.1:8000/recognize"
+```
+
+### 4. Continuous Mode (Captures every 2 seconds, like Hermes)
+```bash
+python3 camera_test.py --continuous --interval 2.0
+```
+*(Press `Ctrl+C` to stop)*
+
+### 5. Offline Testing with a Local Image File
+```bash
+python3 camera_test.py --image "sample_car.jpg"
+```
