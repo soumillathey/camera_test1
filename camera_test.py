@@ -316,11 +316,19 @@ def main():
         default="captured_frame.jpg" if cfg.get("save_last_frame") else None,
         help="Path to save the captured frame locally for verification.",
     )
+    # Support interval_seconds, sleep_time, sleep_seconds, or interval keys from config.json
+    default_interval = float(
+        cfg.get("sleep_time")
+        or cfg.get("sleep_seconds")
+        or cfg.get("interval_seconds")
+        or cfg.get("interval", 5.0)
+    )
+
     parser.add_argument(
         "--interval",
         type=float,
-        default=float(cfg.get("interval_seconds", 5.0)),
-        help="Interval in seconds between ANPR requests (default: 5.0s).",
+        default=default_interval,
+        help="Interval/sleep time in seconds between ANPR requests (default: 5.0s).",
     )
     parser.add_argument(
         "--once",
